@@ -16,7 +16,7 @@
 /* global eruda, erudaCode, erudaMonitor, erudaTiming */
 
 // 'use strict';
-if (windows?.eruda != null) {
+if (window?.eruda != null) {
   eruda.init({
     default: {
       transparency: 0.95,
@@ -27,7 +27,7 @@ if (windows?.eruda != null) {
   eruda.add(erudaCode);
   eruda.add(erudaMonitor);
   eruda.add(erudaTiming);
-  eruda.position({x: 5, y: window.screen.height * 0.3;});
+  eruda.position({ x: 5, y: window.screen.height * 0.3 });
   
   // Replace normal console with the eruda console (for the UserScript window, at least).
   window.console = eruda.get('console');
