@@ -32,6 +32,23 @@ const IncludesIC = (strArray, strToFind) => {
     };
 };
 
+const restoreOriginalConsole(replaceWindowsConsole = null) => {
+    replaceWindowsConsole ??= false;
+
+    // Restore original window.console (fixes sites that override console).
+    const tempConsoleIFrame = document.createElement('iframe');
+    tempConsoleIFrame.style.display = 'none';
+    document.body.appendChild(tempConsoleIFrame);
+    // if (window.console !== tempConsoleIFrame.contentWindow.console) {
+    //     alert('console mismatch');
+    // }
+    const originalConsole = tempConsoleIFrame.contentWindow.console;
+    if (replaceWindowsConsole === true) {
+        window.console = originalConsole;
+    }
+    return originalConsole;
+}
+
 class ErudaInfo {
     get run()       { return this.url  || this.ref; }
     get load()      { return this.show || this.url != null; }
@@ -91,6 +108,7 @@ const defaultEnableErudaOptions = {
     // enableErudaOptions
           checkPageUrl: false,     // If true, only load eruda if page url includes eruda=true
     suppressTouchStart: true,      // see notes below
+       overrideConsole: true,      // if true, eruda's console replaces the exist console
                console: undefined, // alternate 'console' to replace with eruda's console,
                                    // pass null to suppress the replacement of the console.
                                    // defaults to 'window.console'.
@@ -104,13 +122,17 @@ const defaultEnableErudaOptions = {
 
 
 const enableEruda = (options = null, ) => { 
+    // Don't run if checkPageUrl == true and 'eruda=true' switch not in URL -OR-
+    //           if eruda is already running
     if ((options.checkPageUrl && !/eruda=true/.test(window.location)) && 
         localStorage.getItem('active-eruda') != 'true') {
-        return;
+        return;     
     }
-    // "loading"      -- first state
-    // "interactive"  -- just before DOMContentLoaded
-    // "complete"     -- after/near load event
+
+    // Wait until page is partly loaded before proceeding
+    //     "loading"      -- first state
+    //     "interactive"  -- just before DOMContentLoaded
+    //     "complete"     -- after/near load event
     if (document.readyState !== "complete") {
         // Loading hasn't finished yet
         window.addEventListener("load", (evt) => enableErudaLoadHandler(options));
@@ -120,7 +142,7 @@ const enableEruda = (options = null, ) => {
     }
 }
 
-const enableErudaPageLoadHandler  = (options = null) => { 
+const enableErudaPageLoadHandler  = (options = null) => {
     options ??= defaultEnableErudaOptions;
     
     options.eruda                      ??= options.eruda ?? {};
@@ -130,28 +152,54 @@ const enableErudaPageLoadHandler  = (options = null) => {
     options.eruda.default.displaySize  ??= options.displaySize; 
     options.eruda.default.theme        ??= options.theme;
     options.eruda
-    const toolList ??= options?
-
-    if (!import.meta.env.MODE === 'development') {
+    const toolList ??= options?.tools;
+    
+    if (import.meta.env.MODE !== undefined &&
+        import.meta.env.MODE !== 'development') { // check for enviroment setting
         return;
         // import('eruda').then(eruda => eruda.default.init());
     }
-    if (window?.eruda != null) {
-        eruda.default.init(options.eruda);
-        if (tErudaCode != null) {
-            eruda.add(erudaCode);
+
+    // keep copies of the original browser's and page's console(s) object
+    let browserConsole;
+    if (overrideConsole === true) {
+        browserConsole = restoreOriginalConsole(false); // gets browser's OG console
+        window.eruda.browserConsole = browserConsole; // save cooy of browser's console
+        window.eruda.pageConsole    = window.console; // save copy of current page's console
+    }
+    
+    const eruda = window.eruda;
+    if (eruda != null) {
+        // needed so that eruda links to options.console, if provided
+        if (options?.console != null) {
+            window.console = options?.console ?? window.console;
         }
-        for (const ei of erudaModuleInfo) {
+        // initialize eruda
+        eruda.init(options.eruda);
+
+        if (overrideConsole === true) {
+            // get eruda's console and switch system 
+            const erudaConsole = eruda.get('console');
+            erudaConsole.log(`import.meta.env.MODE: ${import.meta.env.MODE}`);
+    
+            // set the window console to use eruda's console output
+            window.console = erudaConsole;
+        }
+        
+        const console = window.console;
+        for (const ei of erudaModuleInfo) {  // cycle through each module
             if (ei.builtin === true && ei.show === true) {        // just show builtins
                 eruda.show(ei.id);
                 continue;
                 
-            } else if (!IncludesIC(options.tools, ei.id) ||
-                       ei.builtin === true && ei.show === false) { // skip this module
+            } else if (!IncludesIC(toolList, ei.id) ||
+                       ei.builtin === true && ei.show === false) {
+                // skip builtins that arent't shown
                 eruda.hide(ei.id);
                 continue;
             }
-            
+
+            // import the module, if needed
             let pluginRef = null;
             if (ei.run === true) {
                 if (ei.import != null && window[ei.import] != null) {
@@ -172,22 +220,24 @@ const enableErudaPageLoadHandler  = (options = null) => {
             }
         }
         
-        // show in order
+        // hide all modules the show modules with show = true.
         for (const ei of erudaModuleInfo) {
+            eruda.hide(ei.id);
             if (ei.show === true) {
                 eruda.show(ei.id);
             } else {
                 eruda.hide(ei.id);
             }
         }
-        
+
+        // re-set eruda options after initialization
         if (options?.scale) {
             eruda.scale(options.scale);
         }
         if (options?.position) {
             eruda.position(options.position);
         }
-        
+    
         const cfg = eruda.get().config;
         if (options?.displaySize) {
             cfg.set('displaySize', options.displaySize);
@@ -200,12 +250,12 @@ const enableErudaPageLoadHandler  = (options = null) => {
         }
         // eruda.position({ x: 5, y: window.screen.height * 0.3 });
         // eruda.get().config.set('displaySize', 55);
-
-        if (options.console !== null) { // null only, undefined is replaced below.
-            // Replace normal console with the eruda console (for the UserScript window, at least).
-            eruda.originalConsole = options.console ?? window.console;
-            options.console       = eruda.get('console');
-        }
+        
+    } else if (eruda == null) {
+        throw Error(`enableEruda:enableErudaPageLoadHandler: Error: window.eruda was null.`);
+        
+    } else if (options?.console != null) {
+        window.console = options?.console;
     }
     
     // Reguarding 'click' events on Safari iOS:
@@ -219,17 +269,22 @@ const enableErudaPageLoadHandler  = (options = null) => {
     //     * have an onclick attribute (can be empty, doesn’t matter)
     if (options.fixTouchClickStart !== true) {
         if (isSafari) {
-          // I can't remember why I wanted/needed this...
-          // (I think it's some kind of 'fix' for iPad Safari):
-          document.addEventListener("touchstart", function() {}, false);
+          // NOTE: I'm not sure if this is still needed with recent Safari iOS versions:
+          //   eruda.js includes the following comment and code:
+          //       // http://stackoverflow.com/questions/3885018/active-pseudo-class-doesnt-work-in-mobile-safari
+          //       if (detectBrowser().name === 'ios') el.setAttribute('ontouchstart', '')
+          document.addEventListener("ontouchstart", function() {}, false);
+          //OG: document.addEventListener("touchstart", function() {}, false);
         }
     }
     
     console.log(`%cUserScriptUtils: initialized.`, 'color:#4060FF;');
 };
 export {
-    enableEruda as enableEruda,
-    IncludesIC  as IncludesIC,
+    enableEruda                 as enableEruda,
+    IncludesIC                  as IncludesIC,
+    window.eruda.browserConsole as browserConsole,
+    window.eruda.pageConsole    as pageConsole,
 };
 
 
