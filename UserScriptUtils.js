@@ -16,7 +16,7 @@
 /* global eruda, erudaCode, erudaMonitor, erudaTiming */
 
 // 'use strict';
-if (window?.eruda != null) {
+//if (window?.eruda != null) {
   eruda.init({
     default: {
       transparency: 0.95,
@@ -32,7 +32,7 @@ if (window?.eruda != null) {
   
   // Replace normal console with the eruda console (for the UserScript window, at least).
   window.console = eruda.get('console');
-}
+//}
 
 // I can't remember why I wanted/needed this...
 // (I think it's some kind of 'fix' for iPad Safari):
