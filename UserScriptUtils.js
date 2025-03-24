@@ -27,7 +27,7 @@
   eruda.add(erudaCode);
   eruda.add(erudaMonitor);
   eruda.add(erudaTiming);
-  eruda.position({ x: 5, y: window.screen.height * 0.3 });
+  eruda.position({ x: 5, y: window.screen.height / 3 });
   eruda.get().config.set('displaySize', 55);
   
   // Replace normal console with the eruda console (for the UserScript window, at least).
