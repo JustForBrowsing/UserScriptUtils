@@ -49,14 +49,15 @@ function RestoreWindowsConsole(appId) {
 //console.log(`${appId}:console check complete.`);
 
 function AddEruda( appId, options = {} ) {
-    options = _.defaults(options, {
+    // options = _.defaults(options, {
+    options = {
           fixConsole: true,
          displaySize: 55,
         transparency: 0.95,
            positionn: { x: 5,
                         y: window.screen.height / 3,
                       },
-    });
+    };
 
     try {
         if (window.M3ERUDAINIT != null) {
@@ -104,7 +105,7 @@ function AddEruda( appId, options = {} ) {
     }
 }
 // erudaInit(appId);
-
+/*
 eruda.init({
          default: {
     transparency: 0.95,
@@ -124,7 +125,7 @@ const erudaConsole = eruda.get('console');
 if (erudaConsole) {
     window.console = erudaConsole
 }
-
+*/
 // I can't remember why I wanted/needed this...
 // (I think it's some kind of 'fix' for iPad Safari):
 document.addEventListener("touchstart", function() {}, false);
