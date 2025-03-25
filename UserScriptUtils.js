@@ -16,7 +16,6 @@
 // Include the following line after the ==UserScript== block to make eslint shut up about eruda:
 /* global eruda, erudaCode, erudaMonitor, erudaTiming */
 
-
 /* global _, CssSelectorGenerator, Enum */
 /* global eruda, erudaFeatures */
 /* global DazProductSlab, daz */
@@ -153,6 +152,10 @@ document.addEventListener("touchstart", function() {}, false);
 
 console.log(`%cUserScriptUtils: initialized.`, 'color:#4060FF;');
 
+exports = {
+    RestoreWindowsConsole: RestoreWindowsConsole,
+                 AddEruda: AddEruda,
+};
 
 
 
