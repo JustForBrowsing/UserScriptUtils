@@ -25,6 +25,7 @@
 // @require     https://cdn.jsdelivr.net/npm/eruda-monitor@1.1.1/eruda-monitor.min.js#sha256-7HNTeKKc32BEABLUmFkVDlDwYVIStEWenCnBfRSkaM4=
 // @require     https://cdn.jsdelivr.net/npm/eruda-timing@2.0.1/eruda-timing.min.js#sha256-PP95GJLgXsyqfEWOWl9d2DPDsoqUBl54vtczCjmS0Q0=
 
+/*
 const RestoreWindowsConsole = (appId) => {
     try {
         const ogWindow = document.createElement('iframe');
@@ -148,6 +149,7 @@ if (erudaConsole) {
 */
 // I can't remember why I wanted/needed this...
 // (I think it's some kind of 'fix' for iPad Safari):
+/*
 document.addEventListener("touchstart", function() {}, false);
 
 console.log(`%cUserScriptUtils: initialized.`, 'color:#4060FF;');
@@ -158,7 +160,7 @@ exports = {
 };
 
 
-
+*/
 
 
 
