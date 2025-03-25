@@ -28,9 +28,9 @@
 
 //let testVar = "nope";
 // console.log("Starting UserScriptUtils:" + testVar);
-(function () {
-    let testVar = "ran';
-})();
+//(function () {
+//    let testVar = "ran';
+//})();
 
 function Test() {
     let testVar = "Test";
