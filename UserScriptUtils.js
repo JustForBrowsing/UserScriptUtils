@@ -14,16 +14,23 @@
 */
 
 // Include the following line after the ==UserScript== block to make eslint shut up about eruda:
-/* global eruda, erudaCode, erudaMonitor, erudaTiming */
+/* -nop-global eruda, erudaCode, erudaMonitor, erudaTiming */
 
-/* global _, CssSelectorGenerator, Enum */
-/* global eruda, erudaFeatures */
-/* global DazProductSlab, daz */
+/* -nop-global _, CssSelectorGenerator, Enum */
+/* -nop-global eruda, erudaFeatures */
+/* -nop-global DazProductSlab, daz */
 
 // @require     https://cdn.jsdelivr.net/npm/eruda@3.4.1/eruda.min.js#sha256-bfOAXaBm8tuuqlR7TKg/pcfBDKi2ukNXsIl788w7mh8=
 // @require     https://cdn.jsdelivr.net/npm/eruda-code@2.2.0/eruda-code.min.js#sha256-QKv2Ow4Dvamh4teg/CpaSA0drpNKyqVUDv4bn0J8a78=
 // @require     https://cdn.jsdelivr.net/npm/eruda-monitor@1.1.1/eruda-monitor.min.js#sha256-7HNTeKKc32BEABLUmFkVDlDwYVIStEWenCnBfRSkaM4=
 // @require     https://cdn.jsdelivr.net/npm/eruda-timing@2.0.1/eruda-timing.min.js#sha256-PP95GJLgXsyqfEWOWl9d2DPDsoqUBl54vtczCjmS0Q0=
+
+console.log("Starting UserScriptUtils");
+
+Test() {
+    console.log("UserScriptUtils:Test");
+}
+
 
 /*
 const RestoreWindowsConsole = (appId) => {
