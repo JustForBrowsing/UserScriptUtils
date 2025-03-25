@@ -26,7 +26,7 @@
 // @require     https://cdn.jsdelivr.net/npm/eruda-timing@2.0.1/eruda-timing.min.js#sha256-PP95GJLgXsyqfEWOWl9d2DPDsoqUBl54vtczCjmS0Q0=
 
 let testVar = "nope";
-console.log("Starting UserScriptUtils:" + testVar);
+// console.log("Starting UserScriptUtils:" + testVar);
 (function () {
     testVar = "ran';
 })();
