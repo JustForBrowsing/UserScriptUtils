@@ -26,7 +26,7 @@
 // @require     https://cdn.jsdelivr.net/npm/eruda-monitor@1.1.1/eruda-monitor.min.js#sha256-7HNTeKKc32BEABLUmFkVDlDwYVIStEWenCnBfRSkaM4=
 // @require     https://cdn.jsdelivr.net/npm/eruda-timing@2.0.1/eruda-timing.min.js#sha256-PP95GJLgXsyqfEWOWl9d2DPDsoqUBl54vtczCjmS0Q0=
 
-function RestoreWindowsConsole(appId) {
+const RestoreWindowsConsole = (appId) => {
     try {
         const ogWindow = document.createElement('iframe');
         ogWindow.style.display = 'none';
@@ -47,61 +47,82 @@ function RestoreWindowsConsole(appId) {
 }
 //fixConsole(appId);
 //console.log(`${appId}:console check complete.`);
-
-function AddEruda( appId, options = {} ) {
+const defaultPosition = { 
+    x: 5,
+    y: window.screen.height / 3,
+};
+const AddEruda = ( appId, options = {} ) => {
     // options = _.defaults(options, {
-    options = {
+    let options = {
           fixConsole: true,
          displaySize: 55,
         transparency: 0.95,
-           positionn: { x: 5,
-                        y: window.screen.height / 3,
-                      },
+            position: defaultPosition,
     };
 
     try {
-        if (window.M3ERUDAINIT != null) {
-            console.log(`${appId}:erudaInit: Already Running.`);
-            return;
-        }
-        window.M3ERUDAINIT = 'creating';
-
-        if (options.fixConsole) {
+        if (options?.fixConsole ?? true) {
              RestoreWindowsConsole(appId);
         }
+     
+    } catch (err) {
+        const errMsg = `${appId}:AddEruda:Fixing Console: err: ${typeof err}: '${err.message}'.`;
+        console.error(errMsg);
+        alert(errMsg);
+    }
 
-        console.log(`${appId}:erudaInit: Starting eruda console...`);
-        eruda.init({
-               autoScale: true,
-            useShadowDom: true,
-                    tool: ['console', 'elements', 'info', 'sources',
-                           'resources', 'network', 'settings'],
-                defaults: {
-                     displaySize: options?.displaySize,
-                    transparency: options?.transparency,
-                },
-                console: {
-                    catchGlobalErr: true,
-                       asyncRender: true,
-                },
-        });
-        eruda.position(options?.position);
+    try {
+        if (window.M3ERUDAINIT != null) {
+            console.log(`${appId}:AddEruda: Eruda Already Running, Jumping To (Re)Configuring Eruda`);
+            return;
+        
+        } else {
+            window.M3ERUDAINIT = 'creating';
+            console.log(`${appId}:AddEruda: Starting eruda console...`);
+            eruda.init({
+                   autoScale: true,
+                useShadowDom: true,
+                        tool: ['console', 'elements', 'info', 'sources',
+                               'resources', 'network', 'settings'],
+                    defaults: {
+                        displaySize: options?.displaySize ?? 55,
+                       transparency: options?.transparency ?? 0.95,
+                    },
+                    console: {
+                        catchGlobalErr: true,
+                           asyncRender: true,
+                    },
+            });
+            window.M3ERUDAINIT = 'created';
+         
+     } catch (err) {
+        const errMsg = `${appId}:AddEruda:Creating Eruda: err: ${typeof err}: '${err.message}'.`;
+        console.error(errMsg);
+        alert(errMsg);
+    }
+ 
+    try {
+        window.M3ERUDAINIT = 'configuring';
+        eruda.position(options?.position ?? defaultPosition); // Set the button position
 
         const eConsole = eruda.get('console');
         eConsole.config.set('catchGlobalErr', true);
         eConsole.config.set('asyncRender',    true);
-        eConsole.config.set('transparency',   true);
-        eConsole.config.set('displaySize',    55);
+        eConsole.config.set('transparency',   options?.transparency ?? 0.95);
+        eConsole.config.set('displaySize',    options?.displaySize ?? 55);
 
+        window.M3ERUDAINIT = 'changingToErudaConsole';
+        windows.console = eConsole;
+     
         window.M3ERUDAINIT = 'running';
-
+     
     } catch (err) {
-        const errMsg = `${appId}:erudaInit: err:`;
+        const errMsg = `${appId}:AddEruda:Configuring Eruda: err: ${typeof err}: '${err.message}'.`;
         console.error(errMsg);
         alert(errMsg);
-
+     
     } finally {
-        console.log(`${appId}:erudaInit: ...Complete.`);
+        console.log(`${appId}:AddEruda: ...Complete.`);
     }
 }
 // erudaInit(appId);
@@ -131,3 +152,21 @@ if (erudaConsole) {
 document.addEventListener("touchstart", function() {}, false);
 
 console.log(`%cUserScriptUtils: initialized.`, 'color:#4060FF;');
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
